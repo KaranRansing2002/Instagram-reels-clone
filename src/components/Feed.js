@@ -1,12 +1,29 @@
-import React,{useContext} from 'react';
+import React,{useContext,useEffect, useState} from 'react';
 import {AuthContext} from '../context/AuthContext'
+import { database } from "../firebase";
+import UploadFile from './UploadFile';
 
 function Feed() {
-  const {logout}=useContext(AuthContext);
-  return <div>
-      <h1>Welcome!</h1>
-      <button onClick={logout}>Log Out</button>
-  </div>;
+  const {user,logout}=useContext(AuthContext);
+  const [userData,setUserData]=useState();
+
+  useEffect(()=>{ 
+    const unsub=database.users.doc(user.uid).onSnapshot((snapshot)=>{
+      setUserData(snapshot.data())
+    })
+    return ()=>{unsub()}
+  },[user])
+  return (
+    <>
+    <div style={{display : 'flex',justifyContent : 'flex-end',marginTop : '1rem',marginRight : '4rem'}}><button onClick={logout}>log out</button></div>
+    <div style={{display : 'flex',justifyContent : 'center',alignItems : 'center',flexDirection : 'column'}}>
+        <div >
+          <h1>Welcome!</h1>          
+      </div>
+      <UploadFile user={userData}/>
+    </div>
+    </>
+  )
 }
 
 export default Feed;
